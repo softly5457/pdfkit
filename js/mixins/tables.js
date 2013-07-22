@@ -11,7 +11,7 @@
     table: function(data, options) {
       var row, rowIndex, _i, _len, _results;
       this.tableOptions = options;
-      this.rowY = this.page.margins.top + this.tableOptions.margins.top;
+      this.rowY = this.tableOptions.y || this.page.margins.top + this.tableOptions.margins.top;
       this.printHeaderRow();
       _results = [];
       for (rowIndex = _i = 0, _len = data.length; _i < _len; rowIndex = ++_i) {
@@ -83,7 +83,7 @@
         };
         wrapper = new LineWrapper(this);
         wrapper.on('line', line.bind(this));
-        wrapper.wrap([row[col.id] || ''], {
+        wrapper.wrap([row[col.id] + '' || ''], {
           width: this.getColWidth(colIndex)
         });
         if (height > maxHeight) {

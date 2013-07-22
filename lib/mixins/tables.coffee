@@ -13,7 +13,7 @@ module.exports =
 
   table: (data, options) ->
     @tableOptions = options
-    @rowY = @page.margins.top + @tableOptions.margins.top
+    @rowY = @tableOptions.y or @page.margins.top + @tableOptions.margins.top
     @printHeaderRow()
     @printRow rowIndex, row for row, rowIndex in data
 
@@ -100,7 +100,7 @@ module.exports =
       line = () -> height += @currentLineHeight(true)
       wrapper = new LineWrapper(this)
       wrapper.on 'line', line.bind(this)
-      wrapper.wrap([row[col.id] or ''], { width: @getColWidth(colIndex) })
+      wrapper.wrap([row[col.id]+'' or ''], { width: @getColWidth(colIndex) })
       if height > maxHeight
         maxHeight = height
 
