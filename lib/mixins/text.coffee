@@ -36,7 +36,7 @@ module.exports =
             text = text.replace(/\s{2,}/g, ' ')
             
         paragraphs = text.split '\n'
-        
+
         # word wrapping
         if options.width
             wrapper = new LineWrapper(this)

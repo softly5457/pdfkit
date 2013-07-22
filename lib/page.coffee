@@ -9,12 +9,12 @@ class PDFPage
         @layout = options.layout or 'portrait'
         
         # if margin was passed as a single number
-        if typeof options.margin is 'number'
+        if typeof options.margins is 'number'
             @margins = 
-                top: options.margin
-                left: options.margin
-                bottom: options.margin
-                right: options.margin
+                top: options.margins
+                left: options.margins
+                bottom: options.margins
+                right: options.margins
         
         # default to 1 inch margins
         else
