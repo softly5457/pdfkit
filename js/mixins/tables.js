@@ -9,16 +9,16 @@
       return console.log('init tables');
     },
     table: function(data, options) {
-      var row, rowIndex, _i, _len, _results;
+      var row, rowIndex, _i, _len;
       this.tableOptions = options;
       this.rowY = this.tableOptions.y || this.page.margins.top + this.tableOptions.margins.top;
       this.printHeaderRow();
-      _results = [];
       for (rowIndex = _i = 0, _len = data.length; _i < _len; rowIndex = ++_i) {
         row = data[rowIndex];
-        _results.push(this.printRow(rowIndex, row));
+        this.printRow(rowIndex, row);
       }
-      return _results;
+      this.y += this.tableOptions.padding.bottom + this.tableOptions.margins.bottom;
+      return this.x = this.tableOptions.margins.left;
     },
     printRow: function(rowIndex, row) {
       var col, colIndex, _i, _j, _len, _len1, _ref, _ref1;
@@ -34,16 +34,25 @@
         col = _ref[colIndex];
         this.printCol(rowIndex, row, colIndex, col);
       }
-      this.moveTo(this.tableOptions.margins.left, this.rowY).lineTo(this.tableOptions.margins.left + this.getWidth(), this.rowY).lineTo(this.tableOptions.margins.left + this.getWidth(), this.rowY + this.rowHeight).lineTo(this.tableOptions.margins.left, this.rowY + this.rowHeight).stroke();
-      _ref1 = this.tableOptions.columns;
-      for (colIndex = _j = 0, _len1 = _ref1.length; _j < _len1; colIndex = ++_j) {
-        col = _ref1[colIndex];
-        this.moveTo(this.getXOfColumn(colIndex), this.rowY).lineTo(this.getXOfColumn(colIndex), this.rowY + this.rowHeight).stroke();
+      this.moveTo(this.tableOptions.margins.left + this.getWidth(), this.rowY + this.rowHeight).lineTo(this.tableOptions.margins.left, this.rowY + this.rowHeight).stroke();
+      if (this.needsVerticalLines()) {
+        _ref1 = this.tableOptions.columns;
+        for (colIndex = _j = 0, _len1 = _ref1.length; _j < _len1; colIndex = ++_j) {
+          col = _ref1[colIndex];
+          this.moveTo(this.getXOfColumn(colIndex), this.rowY).lineTo(this.getXOfColumn(colIndex), this.rowY + this.rowHeight).stroke();
+        }
+        this.moveTo(this.tableOptions.margins.left + this.getWidth(), this.rowY).lineTo(this.tableOptions.margins.left + this.getWidth(), this.rowY + this.rowHeight).stroke();
       }
       return this.rowY += this.rowHeight;
     },
     printCol: function(rowIndex, row, colIndex, col) {
-      return this.font('Times-Roman').text(row[col.id] || '', this.getXOfColumn(colIndex) + this.tableOptions.padding.left, this.rowY + this.tableOptions.padding.top, {
+      var colOpt, text;
+      colOpt = this.tableOptions.columns[colIndex];
+      text = row[col.id] || '';
+      if (colOpt.renderer) {
+        text = colOpt.renderer(text);
+      }
+      return this.font(this.tableOptions.font).text(text, this.getXOfColumn(colIndex) + this.tableOptions.padding.left, this.rowY + this.tableOptions.padding.top, {
         width: this.getColWidth(colIndex)
       });
     },
@@ -55,16 +64,20 @@
         col = _ref[colIndex];
         this.printHeaderCol(colIndex);
       }
-      this.moveTo(this.tableOptions.margins.left, this.rowY).lineTo(this.tableOptions.margins.left + this.getWidth(), this.rowY).lineTo(this.tableOptions.margins.left + this.getWidth(), this.rowY + this.rowHeight).lineTo(this.tableOptions.margins.left, this.rowY + this.rowHeight).stroke();
-      _ref1 = this.tableOptions.columns;
-      for (colIndex = _j = 0, _len1 = _ref1.length; _j < _len1; colIndex = ++_j) {
-        col = _ref1[colIndex];
-        this.moveTo(this.getXOfColumn(colIndex), this.rowY).lineTo(this.getXOfColumn(colIndex), this.rowY + this.rowHeight).stroke();
+      this.moveTo(this.tableOptions.margins.left, this.rowY).lineTo(this.tableOptions.margins.left + this.getWidth(), this.rowY).lineTo(this.tableOptions.margins.left + this.getWidth(), this.rowY + 1).lineTo(this.tableOptions.margins.left, this.rowY + 1).stroke();
+      this.moveTo(this.tableOptions.margins.left + this.getWidth(), this.rowY + this.rowHeight).lineTo(this.tableOptions.margins.left, this.rowY + this.rowHeight).lineTo(this.tableOptions.margins.left + this.getWidth(), this.rowY + this.rowHeight + 1).lineTo(this.tableOptions.margins.left, this.rowY + this.rowHeight + 1).stroke();
+      if (this.needsVerticalLines()) {
+        _ref1 = this.tableOptions.columns;
+        for (colIndex = _j = 0, _len1 = _ref1.length; _j < _len1; colIndex = ++_j) {
+          col = _ref1[colIndex];
+          this.moveTo(this.getXOfColumn(colIndex), this.rowY).lineTo(this.getXOfColumn(colIndex), this.rowY + this.rowHeight).stroke();
+        }
+        this.moveTo(this.tableOptions.margins.left + this.getWidth(), this.rowY).lineTo(this.tableOptions.margins.left + this.getWidth(), this.rowY + this.rowHeight).stroke();
       }
       return this.rowY += this.rowHeight;
     },
     printHeaderCol: function(colIndex) {
-      return this.font('Times-Bold').text(this.tableOptions.columns[colIndex].name || '', this.getXOfColumn(colIndex) + this.tableOptions.padding.left, this.rowY + this.tableOptions.padding.top, {
+      return this.font(this.tableOptions.boldFont).text(this.tableOptions.columns[colIndex].name || '', this.getXOfColumn(colIndex) + this.tableOptions.padding.left, this.rowY + this.tableOptions.padding.top, {
         width: this.getColWidth(colIndex)
       });
     },
@@ -103,6 +116,9 @@
         }
       }
       return this.tableOptions.margins.left + (this.getWidth() * perc / 100);
+    },
+    needsVerticalLines: function() {
+      return !this.tableOptions.noVerticalLines || this.tableOptions.noVerticalLines === false;
     },
     getWidth: function() {
       return this.page.width - (this.tableOptions.margins.left + this.tableOptions.margins.right);
